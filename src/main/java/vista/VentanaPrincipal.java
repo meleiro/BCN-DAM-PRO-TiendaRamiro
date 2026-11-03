@@ -172,7 +172,7 @@ public class VentanaPrincipal extends JFrame {
             );
 
             cargarClientes();
-            cargarProductos();
+            //cargarProductos();
 
         } catch (SQLException ex) {
 
