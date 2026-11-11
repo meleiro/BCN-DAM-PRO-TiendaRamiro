@@ -1,0 +1,789 @@
+
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+============================================================
+ARCHIVO persistence.xml
+============================================================
+
+Este archivo contiene la configuración de persistencia
+de nuestra aplicación Java.
+
+Su objetivo es indicar a Jakarta Persistence (JPA):
+
+1. Qué proveedor de persistencia vamos a utilizar.
+2. Qué entidades Java forman parte de la configuración.
+3. A qué base de datos queremos conectarnos.
+4. Qué controlador JDBC utilizaremos.
+5. Qué usuario y contraseña necesitamos.
+6. Qué opciones de Hibernate queremos activar.
+
+UBICACIÓN OBLIGATORIA:
+
+src/main/resources/META-INF/persistence.xml
+
+Maven copia este archivo a:
+
+target/classes/META-INF/persistence.xml
+
+Desde esa ubicación, JPA puede localizarlo
+en el classpath de nuestra aplicación.
+
+IMPORTANTE:
+
+Este archivo no contiene consultas SQL
+ni implementa operaciones CRUD.
+
+Solamente configura la infraestructura
+que posteriormente utilizarán nuestros DAO.
+-->
+
+<!--
+============================================================
+ELEMENTO RAÍZ <persistence>
+============================================================
+
+Es el elemento principal del documento XML.
+
+Contiene una o varias unidades de persistencia.
+
+Una unidad de persistencia agrupa la configuración
+necesaria para trabajar con un conjunto de entidades.
+
+Vamos a estudiar sus atributos.
+
+------------------------------------------------------------
+xmlns
+------------------------------------------------------------
+
+xmlns="https://jakarta.ee/xml/ns/persistence"
+
+Declara el espacio de nombres XML utilizado
+por Jakarta Persistence.
+
+Un espacio de nombres permite identificar
+formalmente los elementos del documento.
+
+Por ejemplo:
+
+<persistence>
+<persistence-unit>
+<provider>
+<class>
+<properties>
+<property>
+
+Estos elementos pertenecen al vocabulario XML
+definido por Jakarta Persistence.
+
+------------------------------------------------------------
+xmlns:xsi
+------------------------------------------------------------
+
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+Declara el espacio de nombres utilizado
+para ciertos atributos relacionados con
+esquemas XML.
+
+Lo utilizamos en el siguiente atributo:
+
+xsi:schemaLocation
+
+------------------------------------------------------------
+xsi:schemaLocation
+------------------------------------------------------------
+
+Indica el espacio de nombres y la ubicación
+del esquema XSD asociado.
+
+Un archivo XSD define reglas sobre la estructura
+que puede tener un documento XML.
+
+Por ejemplo:
+
+- Qué elementos están permitidos.
+- Qué atributos pueden utilizarse.
+- Qué estructura debe respetarse.
+- Qué tipos de valores son válidos.
+
+En nuestro caso hacemos referencia al esquema
+de persistencia de Jakarta Persistence 3.0.
+
+------------------------------------------------------------
+version="3.0"
+------------------------------------------------------------
+
+Indica la versión del formato XML
+de configuración de persistencia.
+
+IMPORTANTE:
+
+No significa que estemos utilizando
+Hibernate 3.0.
+
+Tampoco indica la versión del JDK.
+
+Es la versión del esquema XML utilizado
+para interpretar persistence.xml.
+
+Podemos utilizar este formato con una
+implementación de Hibernate compatible.
+-->
+
+<persistence
+        xmlns="https://jakarta.ee/xml/ns/persistence"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            https://jakarta.ee/xml/ns/persistence
+            https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+        version="3.0">
+
+    <!--
+    ========================================================
+    UNIDAD DE PERSISTENCIA
+    ========================================================
+
+    <persistence-unit>
+
+    Define una unidad de persistencia.
+
+    Podemos entenderla como un conjunto de
+    configuraciones que JPA utilizará conjuntamente.
+
+    --------------------------------------------------------
+    name="tiendaPU"
+    --------------------------------------------------------
+
+    Es el nombre de nuestra unidad de persistencia.
+
+    PU significa Persistence Unit.
+
+    Este nombre es especialmente importante
+    porque lo utilizamos desde JpaUtil.java.
+
+    Allí tenemos:
+
+    Persistence.createEntityManagerFactory("tiendaPU");
+
+    JPA buscará una unidad cuyo nombre sea
+    exactamente "tiendaPU".
+
+    Si escribimos otro nombre, por ejemplo:
+
+    "tienda"
+
+    no estaremos haciendo referencia
+    a la misma unidad de persistencia.
+
+    --------------------------------------------------------
+    transaction-type="RESOURCE_LOCAL"
+    --------------------------------------------------------
+
+    Indica cómo se gestionarán las transacciones.
+
+    RESOURCE_LOCAL significa que nuestra aplicación
+    gestiona directamente las transacciones
+    mediante los recursos de persistencia.
+
+    Por ejemplo:
+
+    EntityManager em = JpaUtil.abrir();
+
+    EntityTransaction tx = em.getTransaction();
+
+    tx.begin();
+
+    em.persist(cliente);
+
+    tx.commit();
+
+    En este caso somos nosotros quienes decidimos:
+
+    - Cuándo comienza una transacción.
+    - Cuándo confirmamos los cambios.
+    - Cuándo deshacemos una operación.
+
+    Este modelo resulta adecuado para
+    nuestro proyecto Java de escritorio.
+
+    Existe también la modalidad JTA,
+    utilizada habitualmente cuando la gestión
+    de transacciones depende de un entorno
+    o coordinador de transacciones.
+    -->
+
+    <persistence-unit
+            name="tiendaPU"
+            transaction-type="RESOURCE_LOCAL">
+
+        <!--
+        ====================================================
+        PROVEEDOR DE PERSISTENCIA
+        ====================================================
+
+        <provider>
+
+        Indica qué implementación de Jakarta Persistence
+        queremos utilizar.
+
+        Recordemos la diferencia:
+
+        JPA:
+            Es una especificación.
+
+        Hibernate:
+            Es una implementación de esa especificación.
+
+        ----------------------------------------------------
+        org.hibernate.jpa.HibernatePersistenceProvider
+        ----------------------------------------------------
+
+        Es el nombre completo de la clase
+        que actúa como proveedor de persistencia.
+
+        Hibernate implementa las operaciones
+        definidas por JPA.
+
+        Por ejemplo, cuando ejecutamos:
+
+        em.persist(cliente);
+
+        JPA define la operación.
+
+        Hibernate se encarga de realizar
+        el trabajo necesario para persistir
+        la entidad utilizando PostgreSQL.
+
+        IMPORTANTE:
+
+        Esta clase pertenece a la biblioteca
+        Hibernate ORM.
+
+        Por eso necesitamos tener la dependencia
+        hibernate-core en nuestro pom.xml.
+        -->
+
+        <provider>
+            org.hibernate.jpa.HibernatePersistenceProvider
+        </provider>
+
+        <!--
+        ====================================================
+        REGISTRO DE ENTIDADES
+        ====================================================
+
+        <class>
+
+        Permite registrar una clase Java
+        como parte de esta unidad de persistencia.
+
+        En nuestro caso registramos:
+
+        modelo.orm.ClienteEntidad
+
+        ----------------------------------------------------
+        ¿QUÉ SIGNIFICA ESTE NOMBRE?
+        ----------------------------------------------------
+
+        modelo.orm:
+            Es el paquete Java.
+
+        ClienteEntidad:
+            Es el nombre de la clase.
+
+        El nombre completo identifica
+        exactamente la clase que queremos registrar.
+
+        ----------------------------------------------------
+        ¿POR QUÉ REGISTRAMOS ESTA CLASE?
+        ----------------------------------------------------
+
+        Porque queremos que Hibernate gestione
+        objetos de tipo ClienteEntidad.
+
+        Recordemos que la clase contiene:
+
+        @Entity
+        @Table(name = "cliente")
+
+        La anotación @Entity indica que es una entidad.
+
+        La anotación @Table indica que se corresponde
+        con la tabla cliente de PostgreSQL.
+
+        ----------------------------------------------------
+        ¿QUÉ OCURRE SI AÑADIMOS PRODUCTOS?
+        ----------------------------------------------------
+
+        Podríamos añadir otra entrada:
+
+        <class>modelo.orm.ProductoEntidad</class>
+
+        De esta manera registraríamos también
+        la entidad correspondiente a productos.
+
+        IMPORTANTE:
+
+        Registrar una entidad en este XML
+        no crea automáticamente su tabla.
+
+        El comportamiento depende de las
+        propiedades de Hibernate que configuramos
+        más adelante.
+        -->
+
+        <class>modelo.orm.ClienteEntidad</class>
+
+        <!--
+        ====================================================
+        BLOQUE <properties>
+        ====================================================
+
+        Contiene las propiedades de configuración
+        que utilizará JPA y Hibernate.
+
+        Cada elemento <property> contiene normalmente:
+
+        name:
+            Nombre de la propiedad.
+
+        value:
+            Valor que queremos asignarle.
+
+        Por ejemplo:
+
+        <property
+            name="hibernate.show_sql"
+            value="true"/>
+
+        En este ejemplo estamos activando
+        la visualización del SQL generado.
+
+        Algunas propiedades pertenecen
+        a la especificación Jakarta Persistence.
+
+        Otras son específicas de Hibernate.
+        -->
+
+        <properties>
+
+            <!--
+            ================================================
+            CONTROLADOR JDBC
+            ================================================
+
+            jakarta.persistence.jdbc.driver
+
+            Indica qué controlador JDBC utilizaremos
+            para acceder a la base de datos.
+
+            En nuestro caso:
+
+            org.postgresql.Driver
+
+            Es la clase del controlador JDBC
+            de PostgreSQL.
+
+            Hibernate necesita comunicarse
+            con la base de datos.
+
+            Para ello utiliza JDBC internamente.
+
+            ------------------------------------------------
+            ¿DE DÓNDE SALE ESTE CONTROLADOR?
+            ------------------------------------------------
+
+            De la dependencia PostgreSQL JDBC
+            que tenemos en pom.xml.
+
+            Por ejemplo:
+
+            org.postgresql:postgresql:42.7.8
+
+            IMPORTANTE:
+
+            Hibernate no sustituye al controlador JDBC.
+
+            Lo utiliza para realizar las operaciones
+            contra PostgreSQL.
+            -->
+
+            <property
+                    name="jakarta.persistence.jdbc.driver"
+                    value="org.postgresql.Driver"/>
+
+            <!--
+            ================================================
+            URL DE CONEXIÓN
+            ================================================
+
+            jakarta.persistence.jdbc.url
+
+            Indica la dirección de la base de datos.
+
+            En nuestro caso:
+
+            jdbc:postgresql://localhost:5432/tienda_ramiro2
+
+            Vamos a dividirla.
+
+            ------------------------------------------------
+            jdbc:
+            ------------------------------------------------
+
+            Indica que utilizamos una URL JDBC.
+
+            ------------------------------------------------
+            postgresql:
+            ------------------------------------------------
+
+            Identifica el tipo de base de datos.
+
+            ------------------------------------------------
+            localhost
+            ------------------------------------------------
+
+            Indica que el servidor PostgreSQL
+            está en nuestro propio equipo.
+
+            Si PostgreSQL estuviera instalado
+            en otro ordenador, utilizaríamos
+            su dirección IP o nombre de host.
+
+            ------------------------------------------------
+            5432
+            ------------------------------------------------
+
+            Es el puerto TCP habitual de PostgreSQL.
+
+            Debe coincidir con el puerto real
+            configurado en nuestro servidor.
+
+            ------------------------------------------------
+            tienda_ramiro2
+            ------------------------------------------------
+
+            Es el nombre de la base de datos.
+
+            No es el nombre de una tabla.
+
+            Dentro de esta base de datos
+            tenemos tablas como cliente.
+
+            IMPORTANTE:
+
+            Si el nombre de la base de datos
+            es incorrecto, la conexión fallará.
+            -->
+
+            <property
+                    name="jakarta.persistence.jdbc.url"
+                    value="jdbc:postgresql://localhost:5432/tienda_ramiro2"/>
+
+            <!--
+            ================================================
+            USUARIO DE POSTGRESQL
+            ================================================
+
+            jakarta.persistence.jdbc.user
+
+            Indica el usuario con el que queremos
+            autenticarnos en PostgreSQL.
+
+            En nuestro proyecto utilizamos:
+
+            tienda_ramiro_user
+
+            Este usuario debe existir
+            en el servidor PostgreSQL.
+
+            Además, necesita los permisos adecuados.
+
+            Por ejemplo:
+
+            - Conectarse a la base de datos.
+            - Consultar registros.
+            - Insertar registros.
+            - Actualizar registros.
+            - Eliminar registros.
+
+            Los permisos concretos dependerán
+            de las operaciones que queramos realizar.
+
+            IMPORTANTE:
+
+            Este usuario no es un cliente
+            de nuestra aplicación.
+
+            Es una cuenta de acceso
+            al servidor de base de datos.
+            -->
+
+            <property
+                    name="jakarta.persistence.jdbc.user"
+                    value="tienda_ramiro_user"/>
+
+            <!--
+            ================================================
+            CONTRASEÑA DE POSTGRESQL
+            ================================================
+
+            jakarta.persistence.jdbc.password
+
+            Contiene la contraseña correspondiente
+            al usuario configurado anteriormente.
+
+            PostgreSQL comprobará estas credenciales
+            durante la autenticación.
+
+            Si el usuario o la contraseña
+            no son correctos, no podremos conectar.
+
+            ------------------------------------------------
+            CONSIDERACIÓN DE SEGURIDAD
+            ------------------------------------------------
+
+            En esta práctica local estamos utilizando
+            una contraseña escrita directamente
+            en el archivo de configuración.
+
+            Esto facilita el aprendizaje inicial.
+
+            Sin embargo, en aplicaciones reales
+            no deberíamos publicar contraseñas
+            en repositorios de Git.
+
+            Es preferible utilizar mecanismos
+            de configuración externos o secretos
+            gestionados de forma segura.
+            -->
+
+            <property
+                    name="jakarta.persistence.jdbc.password"
+                    value="tienda12345"/>
+
+            <!--
+            ================================================
+            MOSTRAR SQL GENERADO POR HIBERNATE
+            ================================================
+
+            hibernate.show_sql
+
+            Es una propiedad específica de Hibernate.
+
+            Al establecer:
+
+            value="true"
+
+            activamos la visualización del SQL
+            que Hibernate ejecuta.
+
+            Por ejemplo, si escribimos:
+
+            em.createQuery(
+                "SELECT c FROM ClienteEntidad c",
+                ClienteEntidad.class
+            ).getResultList();
+
+            Hibernate puede mostrar una consulta SQL
+            equivalente a:
+
+            select
+                c.id,
+                c.activo,
+                c.email,
+                c.nombre
+            from
+                cliente c
+
+            ------------------------------------------------
+            ¿POR QUÉ ES ÚTIL EN CLASE?
+            ------------------------------------------------
+
+            Porque permite observar cómo Hibernate
+            transforma nuestras operaciones Java
+            y consultas JPQL en SQL.
+
+            También permite comparar el enfoque ORM
+            con el JDBC que ya hemos estudiado.
+
+            IMPORTANTE:
+
+            show_sql es útil durante el desarrollo.
+
+            En aplicaciones de producción,
+            normalmente se controla el registro
+            del SQL mediante un sistema de logging.
+            -->
+
+            <property
+                    name="hibernate.show_sql"
+                    value="true"/>
+
+            <!--
+            ================================================
+            FORMATEAR SQL
+            ================================================
+
+            hibernate.format_sql
+
+            Es otra propiedad de Hibernate.
+
+            Con:
+
+            value="true"
+
+            solicitamos que el SQL mostrado
+            tenga un formato más legible.
+
+            Por ejemplo, en lugar de mostrar:
+
+            select c.id,c.nombre from cliente c
+
+            puede mostrar:
+
+            select
+                c.id,
+                c.nombre
+            from
+                cliente c
+
+            ------------------------------------------------
+            ¿POR QUÉ ES ÚTIL?
+            ------------------------------------------------
+
+            Porque facilita la lectura de las consultas.
+
+            Podemos identificar más fácilmente:
+
+            - SELECT.
+            - FROM.
+            - WHERE.
+            - ORDER BY.
+            - JOIN.
+            - INSERT.
+            - UPDATE.
+            - DELETE.
+
+            IMPORTANTE:
+
+            Esta propiedad no cambia
+            el resultado de las consultas.
+
+            Solamente afecta a su presentación
+            en los mensajes de SQL generados.
+            -->
+
+            <property
+                    name="hibernate.format_sql"
+                    value="true"/>
+
+            <!--
+            ================================================
+            VALIDACIÓN DEL ESQUEMA
+            ================================================
+
+            hibernate.hbm2ddl.auto
+
+            Es una propiedad específica de Hibernate.
+
+            Controla cómo queremos que Hibernate
+            trate el esquema de la base de datos.
+
+            En nuestro proyecto utilizamos:
+
+            value="validate"
+
+            ------------------------------------------------
+            ¿QUÉ SIGNIFICA validate?
+            ------------------------------------------------
+
+            Hibernate comprueba que las tablas
+            y columnas necesarias para las entidades
+            sean compatibles con su configuración.
+
+            Por ejemplo:
+
+            Tenemos la entidad ClienteEntidad.
+
+            Está asociada a la tabla cliente.
+
+            Hibernate comprueba la estructura
+            necesaria para utilizar esa entidad.
+
+            Si falta una tabla o columna requerida,
+            puede producirse un error
+            durante la inicialización.
+
+            ------------------------------------------------
+            ¿QUÉ NO HACE validate?
+            ------------------------------------------------
+
+            No crea automáticamente las tablas.
+
+            No añade columnas nuevas.
+
+            No modifica el esquema existente.
+
+            No elimina las tablas.
+
+            ------------------------------------------------
+            ¿POR QUÉ UTILIZAMOS validate?
+            ------------------------------------------------
+
+            Porque en nuestro proyecto
+            ya hemos creado la base de datos
+            y sus tablas mediante PostgreSQL.
+
+            Queremos mantener el control
+            sobre su estructura.
+
+            Hibernate debe utilizar
+            las tablas existentes.
+
+            ------------------------------------------------
+            OTROS VALORES HABITUALES
+            ------------------------------------------------
+
+            none:
+                No solicita gestión automática
+                del esquema mediante esta opción.
+
+            validate:
+                Comprueba la compatibilidad
+                del esquema existente.
+
+            update:
+                Intenta actualizar el esquema
+                para adaptarlo a las entidades.
+
+            create:
+                Crea el esquema gestionado,
+                pudiendo sustituir estructuras
+                existentes y perder datos.
+
+            create-drop:
+                Crea el esquema al iniciar
+                y lo elimina al cerrar la factoría.
+
+            IMPORTANTE:
+
+            No debemos utilizar create
+            o create-drop sobre una base
+            con datos que necesitemos conservar.
+
+            También debemos recordar que validate
+            no sustituye una revisión completa
+            de todas las restricciones de PostgreSQL.
+            -->
+
+            <property
+                    name="hibernate.hbm2ddl.auto"
+                    value="validate"/>
+
+        </properties>
+
+    </persistence-unit>
+
+</persistence>

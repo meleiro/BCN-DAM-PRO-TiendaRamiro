@@ -14,7 +14,7 @@ public class ClienteDAO {
        List<Cliente> resultado = new ArrayList<>();
 
        String sql = """
-               SELECT id, nombre, email, activo
+               SELECT id, nombre, email, activo, telefono
                FROM cliente
                ORDER BY id
                """;
