@@ -1,32 +1,65 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 
-<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="
-                https://jakarta.ee/xml/ns/persistence
-                https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd "
-             version="3.0">
-    <persistence-unit name="tiendaPU" transaction-type="RESOURCE_LOCAL">
-        <provider>
-            org.hibernate.jpa.HibernatePersistenceProvider
-        </provider>
+<!-- Configuración de Jakarta Persistence (JPA) -->
+<persistence
+        xmlns="https://jakarta.ee/xml/ns/persistence"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            https://jakarta.ee/xml/ns/persistence
+            https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+        version="3.0">
 
+    <!-- Unidad de persistencia utilizada desde JpaUtil.java -->
+    <persistence-unit
+            name="tiendaPU"
+            transaction-type="RESOURCE_LOCAL">
+
+        <!-- Hibernate es el proveedor que implementa JPA -->
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- Entidades Java gestionadas por Hibernate -->
         <class>modelo.orm.ClienteEntidad</class>
+        <class>modelo.orm.ProductoEntidad</class>
 
         <properties>
-            <property name="jakarta.persistence.jdbc.driver"
-                      value="org.postgresql.Driver"/>
-            <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:postgresql://localhost:5432/tienda_ramiro2"/>
-            <property name="jakarta.persistence.jdbc.user"
-                      value="tienda_ramiro_user"/>
-            <property name="jakarta.persistence.jdbc.password"
-                      value="tienda12345"/>
-            <property name="hibernate.show_sql" value="true"/>
-            <property name="hibernate.format_sql" value="true"/>
-            <property name="hibernate.hbm2ddl.auto" value="validate"/>
 
+            <!-- Controlador JDBC de PostgreSQL -->
+            <property
+                    name="jakarta.persistence.jdbc.driver"
+                    value="org.postgresql.Driver"/>
+
+            <!-- Dirección y nombre de la base de datos -->
+            <property
+                    name="jakarta.persistence.jdbc.url"
+                    value="jdbc:postgresql://localhost:5432/tienda_ramiro2"/>
+
+            <!-- Usuario de PostgreSQL -->
+            <property
+                    name="jakarta.persistence.jdbc.user"
+                    value="tienda_ramiro_user"/>
+
+            <!-- Contraseña del usuario -->
+            <property
+                    name="jakarta.persistence.jdbc.password"
+                    value="tienda12345"/>
+
+            <!-- Mostrar las consultas SQL generadas -->
+            <property
+                    name="hibernate.show_sql"
+                    value="true"/>
+
+            <!-- Mostrar el SQL con formato legible -->
+            <property
+                    name="hibernate.format_sql"
+                    value="true"/>
+
+            <!-- Validar las tablas existentes sin modificarlas -->
+            <property
+                    name="hibernate.hbm2ddl.auto"
+                    value="validate"/>
 
         </properties>
+
     </persistence-unit>
+
 </persistence>
